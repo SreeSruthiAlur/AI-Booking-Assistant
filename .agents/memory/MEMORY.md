@@ -1,0 +1,1 @@
+- [Zod codegen compatibility](zod-codegen-compatibility.md) — Keep OpenAPI schemas compatible with the installed Zod major version before using generated validators.

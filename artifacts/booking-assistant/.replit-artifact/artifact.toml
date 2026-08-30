@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "AI Booking Assistant"
+description = "A conversational hospitality booking assistant that helps guests discover stays, compare options, customize reservations, and complete a guided booking with a downloadable confirmation."
+version = "1.0.0"
+id = "artifacts/booking-assistant"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21359
+
+[services.development]
+run = "pnpm --filter @workspace/booking-assistant run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/booking-assistant", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/booking-assistant/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21359"
+BASE_PATH = "/"

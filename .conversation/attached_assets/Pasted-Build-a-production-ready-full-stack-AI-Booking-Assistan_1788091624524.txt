@@ -1,0 +1,34 @@
+Build a production-ready, full-stack AI Booking Assistant web application in Python using Streamlit (or FastAPI + clean frontend).
+
+### Project Overview
+Create an interactive, conversational AI Assistant that helps users find, compare, and book hotel/meeting/service accommodations seamlessly with an intuitive chat interface, structured booking flow, and simulated database.
+
+### Core Features Required:
+1. **Interactive Chat Interface**:
+   - Modern, responsive chat UI with message history, typing indicators, and user/assistant speech bubbles.
+   - Capability to reset session and view current active booking state in a side panel.
+
+2. **Conversational Booking Flow & State Machine**:
+   - **Step 1 - Inquiry & Intent Parsing**: Extract user parameters (Destination/Room type, Check-in/Check-out dates, Number of guests, Budget, Amenities).
+   - **Step 2 - Catalog Search & Recommendations**: Search available mock inventory based on filtered criteria and present top matching options with image preview, price/night, rating, and amenity badges.
+   - **Step 3 - Selection & Add-ons**: Allow user to select an option and add customizations (e.g., Breakfast, Airport shuttle, Late check-out).
+   - **Step 4 - Details Collection & Validation**: Collect customer Name, Email, and Phone number with standard regex validation.
+   - **Step 5 - Confirmation & Mock Payment**: Display a summary invoice card with breakdown of taxes/fees, generate a unique Booking Reference ID (e.g., `BK-89342`), and offer a "Confirm & Pay" button.
+   - **Step 6 - Post-Booking Actions**: Option to download booking confirmation summary (PDF or JSON/text) and view/cancel active bookings.
+
+3. **Fallback & Guardrails**:
+   - Friendly error handling when an unavailable date or invalid email is provided.
+   - Graceful out-of-domain handling if user asks unrelated questions.
+
+4. **Architecture & Modular File Structure**:
+   - `app.py`: Main entry point (Streamlit UI layout and event loop).
+   - `config/config.py`: Environment variables (OpenAI/Groq/Gemini API keys, mock mode fallback), app constants.
+   - `models/llm.py`: LLM connector supporting OpenAI (`gpt-4o-mini` or Groq/Gemini) with a robust rule-based mock engine fallback if no API key is provided so the app always runs.
+   - `utils/database.py`: In-memory SQLite or JSON database with mock listings, room types, pricing, and bookings table.
+   - `utils/validators.py`: Regex & date validation utilities.
+   - `requirements.txt`: Streamlit, langchain/openai (optional), pandas, python-dotenv, fpdf2.
+   - `README.md`: Detailed setup instructions, architecture diagram, and features list.
+
+5. **Self-Contained & Deployable**:
+   - Ensure the app launches immediately on Replit with standard `streamlit run app.py --server.port 5000 --server.address 0.0.0.0`.
+   - Initialize clean mock data automatically on first launch.

@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: booking
+    description: AI booking assistant operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,128 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /listings:
+    get:
+      operationId: getListings
+      tags: [booking]
+      summary: Search available listings
+      parameters:
+        - name: destination
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: checkIn
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: checkOut
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: guests
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 1
+        - name: maxPrice
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 0
+        - name: amenity
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Matching listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Listing"
+  /assistant/message:
+    post:
+      operationId: sendAssistantMessage
+      tags: [booking]
+      summary: Send a message to the booking assistant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssistantMessageInput"
+      responses:
+        "200":
+          description: Assistant response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssistantReply"
+  /bookings:
+    get:
+      operationId: getBookings
+      tags: [booking]
+      summary: List active bookings
+      responses:
+        "200":
+          description: Active bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Booking"
+    post:
+      operationId: createBooking
+      tags: [booking]
+      summary: Create a booking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookingInput"
+      responses:
+        "201":
+          description: Created booking
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+        "400":
+          description: Invalid booking details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /bookings/{reference}:
+    delete:
+      operationId: cancelBooking
+      tags: [booking]
+      summary: Cancel a booking
+      parameters:
+        - name: reference
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Booking cancelled
+        "404":
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +157,79 @@ components:
           type: string
       required:
         - status
+    Listing:
+      type: object
+      required: [id, name, city, country, type, description, imageUrl, pricePerNight, rating, reviewCount, amenities, maxGuests, roomLabel]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        city: { type: string }
+        country: { type: string }
+        type: { type: string }
+        description: { type: string }
+        imageUrl: { type: string }
+        pricePerNight: { type: number }
+        rating: { type: number }
+        reviewCount: { type: number }
+        amenities:
+          type: array
+          items: { type: string }
+        maxGuests: { type: number }
+        roomLabel: { type: string }
+    AssistantMessageInput:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string, minLength: 1 }
+        context:
+          type: object
+          additionalProperties: true
+    AssistantReply:
+      type: object
+      required: [message, intent]
+      properties:
+        message: { type: string }
+        intent: { type: string }
+        suggestedListings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Listing"
+        extracted:
+          type: object
+          additionalProperties: true
+    BookingInput:
+      type: object
+      required: [listingId, checkIn, checkOut, guests, customerName, customerEmail, customerPhone, addOns]
+      properties:
+        listingId: { type: string }
+        checkIn: { type: string }
+        checkOut: { type: string }
+        guests: { type: number, minimum: 1 }
+        customerName: { type: string, minLength: 2 }
+        customerEmail: { type: string, minLength: 3 }
+        customerPhone: { type: string, minLength: 7 }
+        addOns:
+          type: array
+          items: { type: string }
+    Booking:
+      allOf:
+        - $ref: "#/components/schemas/BookingInput"
+        - type: object
+          required: [reference, listing, nights, subtotal, taxes, fees, total, status, createdAt]
+          properties:
+            reference: { type: string }
+            listing:
+              $ref: "#/components/schemas/Listing"
+            nights: { type: number }
+            subtotal: { type: number }
+            taxes: { type: number }
+            fees: { type: number }
+            total: { type: number }
+            status: { type: string }
+            createdAt: { type: string }
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
 
